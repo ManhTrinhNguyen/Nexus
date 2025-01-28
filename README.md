@@ -81,15 +81,6 @@ This project demonstrates my ability to set up and configure **Nexus Repository 
   sudo adduser nexus
   sudo chown -R nexus:nexus /opt/nexus
   ```
-- Configure Nexus to run as a service and start it:
-  ```bash
-  sudo nano /etc/systemd/system/nexus.service
-  ```
-  (Include service configurations.)
-  ```bash
-  sudo systemctl start nexus
-  sudo systemctl enable nexus
-  ```
 
 #### **3. Configure Nexus**
 - Access Nexus via `http://<Droplet_IP>:8081`.
