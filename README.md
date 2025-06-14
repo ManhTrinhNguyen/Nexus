@@ -157,11 +157,24 @@ Now I will switch to `nexus user` `su - nexus`
 
 Then I will start Nexus `/opt/nexus-3.81.1-01/bin/nexus start`
 
-Now I can check If nexus running  `ps aux` 
+Now I can check If nexus running  `ps aux | grep nexus` 
 
 ![Screenshot 2025-06-14 at 12 09 09](https://github.com/user-attachments/assets/30d1fc22-7e8d-4954-8f87-4a4d1483ad57)
 
-Now I can see nexus is running 
+Now I can see nexus is running . And I can see the `process id is 3478`
+
+Now I do `netstat -ltpn` I can see that `process id 3478` is running on port 8081 
+
+![Screenshot 2025-06-14 at 12 13 58](https://github.com/user-attachments/assets/8519ecf1-a635-48b6-b061-24bac09bff44)
+
+That mean If I want to access Nexus from browser I have to open port 8081 in my Firewall 
+
+![Screenshot 2025-06-14 at 12 18 20](https://github.com/user-attachments/assets/b58a4a18-bd40-4599-9a78-d3bdcf51a251)
+
+Once it configured I can access it from the browser `<droplet-public-ip:8081>`
+
+<img width="600" alt="Screenshot 2025-06-14 at 12 19 04" src="https://github.com/user-attachments/assets/a8644c87-0478-432c-8a13-9f7e75f5f808" />
+
 
 
 
