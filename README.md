@@ -11,6 +11,20 @@
 - [Nexus Demo Project](#Nexus-Demo-Project)
 
   - [Install and run Nexus on a Cloud Server](#Install-and-run-Nexus-on-a-Cloud-Server)
+ 
+  - [Sign in to Nexus](#Sign-in-to-Nexus)
+ 
+  - [Repository Types](#Repository-Types)
+ 
+  - [Create new Repository](#Create-new-Repository)
+ 
+  - [Publish Artifact to Repository](#Publish-Artifact-to-Repository)
+ 
+    - [Create Nexus User](#Create-Nexus-User)
+   
+    - [Gradle Project](#Gradle-Project)
+   
+      - [Jar Upload](#Jar-Upload) 
 
 ## Artifact Repository Manager
 
@@ -174,6 +188,180 @@ That mean If I want to access Nexus from browser I have to open port 8081 in my 
 Once it configured I can access it from the browser `<droplet-public-ip:8081>`
 
 <img width="600" alt="Screenshot 2025-06-14 at 12 19 04" src="https://github.com/user-attachments/assets/a8644c87-0478-432c-8a13-9f7e75f5f808" />
+
+#### Sign in to Nexus
+
+After deployed Nexus we have auto generate admin password in `/opt/sonatype-work/nexus3/admin.password` with username is `admin`
+
+Once Login Nexus will ask me to create my new password  
+
+#### Repository Types
+
+I can have multiple Repositories of different formats like Helm Charts, Docker Images, Java Archive file, Javascript artifact, etc 
+
+![Screenshot 2025-06-14 at 12 18 20](https://github.com/user-attachments/assets/46b0bc94-6010-4302-89a8-5a96c8fa5495)
+
+By default I can see some Repostories automatically get created bcs properly its the most used one 
+
+Each Repository has a type (hosted, proxy, group):
+
+**Proxy Repository** : This is a repository that is linked to a remote Reposiory . For example Maven Central Repositories is a remote public repository for Maven artifacts . Developers can download jar files, other artifacts and dependencies for application
+
+  - If a component is requested from the Remote Repository by my application . For example : I am trying to download a library with a Specific Version from Maven Central, it will go through the Proxy instead of directly to remote and first check whether the component is available locally on Nexus, if yes my application that I am developing within the company will take it from Nexus . If not there yet the request will be forwarded to remote Repository . The component  will then be retrived from remote and stored locally in Nexus . So Nexus will act as a cache .
+
+  - Advantages : First of all it saves network bandwidth and time for retrieving the component from remote on every request . I just need to do it once  
+
+![Screenshot 2025-06-14 at 12 52 34](https://github.com/user-attachments/assets/7edb7edd-12af-448f-8817-e69165ff9677)
+
+- `URL: http://143.198.134.109:8081/repository/maven-central/` Which will use to access the repository and get some information of it 
+
+- `Remote Storage : https://repo1.maven.org/maven2/` This is a location of Maven Repository
+
+- Another Advantage of using a proxy repositroy instead of fetching from the remote directly is that it is giving developer single endpoint instead of each developer team managing their own logic
+
+**Hotsed Repository**: This is a Repository Primary Storage for artifacts and components
+
+- For example for a Company own components this is a typical use case where everything that is developed within the company, all the applications, the artifacts are being storted in Nexus hosted repository, so this is the primary location for these artifacts.
+
+- By default I have `maven-realeases` and `maven-snapshots` are Maven two repository formats and each one has the version policies integrated for releases and snapshot respectively and these repositories will be used by Maven or Gradle projects to store Java artifact
+
+- The best practice is that when I am developing an Application in Java, I have this development version of my artifact, so I release a development version to be tested and that will be a Snapshot version and when I actually yest and it's ready to be released to Production, then I have actual releases and this will end in `maven-releases` repository. So this way these 2 are separated, the name of version, the naming can also be different
+
+- These repository types have integrated version policies for managing these artifact
+
+- `Maven-releasees` is intended to be the repository, where you organization publishes internal releases, you can also use this repository for thrid-party component that are not available in puclic or external repositories and can therefore not be retrived via proxy repository . For examle it could be commercial library, some propriatary libraries such as Oracle, JDBC driver that maybe reference by my organization. So they are not externally available so I can create a proxy to fetch directly from them, but you can host it on this `hosted repository`  as company internal component even though it not made by you company
+
+- `Maven-Snapshot` is intended to be the repository, where your organization publishes internal development versions and these development version also called Snapshot
+
+**Group Repository**
+
+I may have multiple individualy repositories in NExus and each one has its own purpose however if you need to use multiple of these repositories in my application, I don't want to configure endpoints of all of these different repositories, I want to address them using just 1 endpoint. And then have all these different repositories 
+
+This type allow me to combine multiple repositories and even other repository groups in a single repository 
+
+
+#### Create new Repository 
+
+I click in the `Create Repository` I have ther list of different Repostory format and types I can choose from 
+
+![Screenshot 2025-06-14 at 12 59 25](https://github.com/user-attachments/assets/87120028-8ce6-4210-a3b0-f89bd8ddd593)
+
+#### Publish Artifact to Repository 
+
+Java Gradle App: (https://gitlab.com/twn-devops-bootcamp/latest/06-nexus/java-app)
+
+Java Maven App: (https://gitlab.com/twn-devops-bootcamp/latest/06-nexus/java-maven-app)
+
+I will upload a Jar file from Maven and Gradle Projects .
+
+I will use a `Maven` hosted repository 
+
+Maven and Gradle have specific command to push to Repository 
+
+Before I can push to Repository I have to configure both tools to connect to Nexus (Nexus Repo URL + Credentials)
+
+- Relistic use cases is we won't give developers the admin username and password for our Nexus Repo Manager .
+
+- We will create Nexus User with permission to upload artifact file in certain repositories and then we will use that Nexus user to upload the jar
+
+#### Create Nexus User 
+
+Go to Security -> Users -> Create Local User  
+
+Usally I would integrate User System using LDAP integration and then give it Nexus Permission 
+
+Create Roles for Nexus User : Go to Roles -> Create Roles -> Choose Nexus Role Type -> Perission is `nx-repository-view-maven2-maven-snapshots-*`
+
+!!! Best Pratice when generally creating permission for users is to give the least necessary permission to a user to execute a task that is really needs to execute, bcs obivously we don't want user to have a lot of permissions 
+
+Now I can assign the Role to my User 
+
+![Screenshot 2025-06-14 at 13 37 16](https://github.com/user-attachments/assets/2f5ee7f6-d536-44aa-99a6-c5f0de740557)
+
+Now I can use this user in my project to give Gradle and Maven credentials of this user to connect  to our nexus
+
+#### Gradle Project 
+
+First thing I will add a plugin for publishing a Jar to Maven formatted repository : `apply plugin: 'maven-publish'`
+
+!!! Note: Both Gradle and Maven Project use the same maven to format to upload the Java artifacts 
+
+This will enrich Gradle with ability to connect to Nexus and push to its Maven Repository 
+
+Now I will configure : 
+
+```
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifact("build/libs/my-app-$version" + ".jar"){
+                extension 'jar'
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name 'nexus'
+            url "http://[nexus-ip]:[nexus port]/repository/maven-snapshots/" 
+            allowInsecureProtocol = true
+            credentials {
+                username project.repoUser
+                password project.repoPassword
+            }
+        }
+    }
+}
+```
+
+- `publications` is a Jar file configuration that we will upload
+
+  - `build/libs/my-app` : This is a location of Artifact when we build the project, Gradle will actually create a `build/libs` folder and it will generate and put the JAR in there
+ 
+  - `$version` Version of the App 
+
+- `repositories` is the Nexus Repository that we will upload that JAR file
+
+  - `name: nexus` : This is a name of the Repository Manager
+ 
+  - `url: http://143.198.134.109:8081/repository/maven-snapshots/` this is a URL of the Repository in my Repository Manager
+ 
+  - I will create `gradle.properties` file to store `username` and `password`
+ 
+```
+gradle.properties
+
+repoUser = tim
+repoPassword = mypassword
+```
+
+In `setting.gradles` I have `rootProject.name = my-app` This will be used to generate the JAR file
+
+- allowInsecureProtocol = true : Bcs we not access Nexus in `HTTPS` this will allow me to access the repositories using `HTTP`
+
+#### Jar Upload 
+
+To build Gradle Application : `gradle build`
+
+![Screenshot 2025-06-14 at 13 59 53](https://github.com/user-attachments/assets/b516f404-1f6a-4329-8204-8fe9acffe1ab)
+
+Once successed I should have a JAr file in `build/lib`
+
+![Screenshot 2025-06-14 at 14 00 54](https://github.com/user-attachments/assets/b3d3cda9-8660-44e0-9074-c6606c0a3a64)
+
+To upload JAR file I will execute `gradle publish`
+
+- This command is not available by default . It from a `apply plugin: 'maven-publish'` that we installed. And we have configured Gradle wirh all the information necessary so that publish command knows what to publish and where to publish that artifact to
+
+![Screenshot 2025-06-14 at 14 03 39](https://github.com/user-attachments/assets/d20c8c1f-da4e-4a66-b724-4935e596c629)
+
+Now I should see my Java application in Maven-Snapshot Repository Manager 
+
+![Screenshot 2025-06-14 at 14 04 57](https://github.com/user-attachments/assets/94079b1b-9ef9-4db5-87c6-d210ca26b34b)
+
+In addition to a `Jar` file in there and I see a bunch of other files and metadata files and so on, which is the way NExus actually store components. So I uploaded 1 specific artifact which is JAR, bu some metadata and additional data and files get generated as information or addtional information for the jar file 
+
+
 
 
 
