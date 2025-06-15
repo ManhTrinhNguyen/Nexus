@@ -26,7 +26,9 @@
    
       - [Jar Upload](#Jar-Upload)
      
-    - [Maven Project](#Maven-Project) 
+    - [Maven Project](#Maven-Project)
+   
+- [Nexus API](#Nexus-API) 
 
 ## Artifact Repository Manager
 
@@ -440,5 +442,76 @@ To upload the Jar `mvn deploy` .
 Once it  success I can see my Maven Artifact in Nexus Repository 
 
 <img width="600" alt="Screenshot 2025-06-15 at 11 40 05" src="https://github.com/user-attachments/assets/b01918e3-bf68-427b-9e50-cc797fb0814e" />
+
+## Nexus API
+
+We need Nexus rest API endpoint to query Nexus repositories for different information like : 
+
+- Which component are avaialbe
+
+- What are the version
+
+- Which repositoies are avaialble and so on
+
+- Query for different information:
+
+- Download an artifact
+
+- Upload an artifact
+
+- List of repositories list of component
+
+I would need those information in CI/CD pipelines where I need to fetch the information about the available versions that maybe user can select to deploy on staging environment or production environment and so on 
+
+To access REST Endpoint :
+
+- Use tools like `curl` or `wget` to execute http request
+
+- I also need to provide Credentiasl of Nexus User
+
+- Use the Nexus user with the required permissions 
+
+For example : `curl -u user:pwd -X GET 'http://143.198.134.109:8081/service/rest/v1/repositories'`
+
+`/service/rest/v1/repositories`: This is an endpoint 
+
+Once it executed I can see a list of Repository that user have permission to fetch 
+
+![Screenshot 2025-06-15 at 11 55 20](https://github.com/user-attachments/assets/c984be94-78a5-493f-972a-82ee6618f2f1)
+
+If I execute with admin user I can see a whole list of repositories
+
+![Screenshot 2025-06-15 at 11 57 11](https://github.com/user-attachments/assets/0729ff47-bf51-430a-96a3-23df521df6fa)
+
+Another query is listing all the components in a certain repository : `curl -u user:pwd -X GET 'http://143.198.134.109:8081/service/rest/v1/components?repository=maven-snapshots'`
+
+- From this endpoint I get all a items that are in snapshots repository 
+
+![Screenshot 2025-06-15 at 12 01 44](https://github.com/user-attachments/assets/cef3d98a-b631-42c1-82e1-db788f78ca7f)
+
+To use Nexus API or any API: I should always reference the documentation. Not learn by heart, because 
+
+1: API's change 
+
+2: there are a lot of endpoints
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
