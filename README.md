@@ -39,6 +39,12 @@
   - [Blob Count](#Blob-Count)
  
   - [Create a Blob store](#Create-a-Blob-store)
+ 
+- [Component and Asset](#Component-and-Asset)
+
+- [Cleanup Policies and Scheduled Tasks](#Cleanup-Policies-and-Scheduled-Tasks)
+
+  - [Create a Cleanup Policy](#Create-a-Cleanup-Policy) 
 
 ## Artifact Repository Manager
 
@@ -572,16 +578,71 @@ I need to decide carefully how many blob stores I create with which sizes and wh
 
 The reasone for that is Once a repository is allocated to a blob store it is there permanently . Blob store can be moved from one storage device to another for example to a larger storage device If I need more space I can do it manually but blob stores can not be split and also one repository cannot use multiple blob stores 
 
+## Component and Asset
 
+**Component**
 
+Abstract, High Level definition 
 
+What we are uploading
 
+Term "component" refers to any type or format (Docker Image, Zip, Jar)
 
+**Assets**
 
+Actual physcial package/files
 
+1 component = 1 or more assets
 
+## Cleanup Policies and Scheduled Tasks
 
+Clean up polices help me decide rules that will clean up artifacts, the components from the repository, either when they are too old, or they haven't been used for a long time 
 
+Clean up old artifacts to make space. You can define logic like:
+
+- Delete all artifacts older than 30 days
+
+- Delete all artifacts, which haven't been used/downloaded for more than 10 days
+
+- You can create individual cleanup policy for each repository
+
+#### Create a Cleanup Policy
+
+I go to Repositorys -> Cleanup Policies -> Create Cleanup Policy 
+
+I can choose `Format: maven2`
+
+I can choose `Release Type` :
+
+- I can modify to clean up `Release And Pre-Release/Snapshots` , or `Release`, or `Pre-Release/Snapshot`
+
+I can configure Cleanup Criteria 
+
+<img width="600" alt="Screenshot 2025-06-15 at 12 58 06" src="https://github.com/user-attachments/assets/94807d5f-0b2f-45ab-b7bf-48d05b3c00de" />
+
+I can choose Preview Reposiotry before I actually configure that policy 
+
+<img width="600" alt="Screenshot 2025-06-15 at 12 59 57" src="https://github.com/user-attachments/assets/510bc9da-6ff9-47b2-a4f5-e6b44c5af180" />
+
+#### Attach Policy to Repository
+
+Now I have create Cleanup Policy . 
+
+To assign Cleanup Policy to Repository go To Repository -> Maven-Snapshot (bcs I want to associate with Maven-snapshot repositories)
+
+At the end I have a cleanup policy I can apply that one to the repository
+
+#### Configuring on Cleanup Policy 
+
+When will this cleanup policy work ?
+
+Go to System -> Tasks -> I can see cleanup Service Task get created in waiting status
+
+I can create new task manually 
+
+!!! Note : Important thing with Cleanup policies and cleaning up components from a repository is that they will not acutally get deleted . They will be marked for deletion (Soft Delete). 
+
+If we want to acutally delete those Item in order to make space we would need to Compact the blob store by using `Admin - Compact Blob store` task
 
 
 
