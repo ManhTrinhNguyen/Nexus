@@ -24,7 +24,9 @@
    
     - [Gradle Project](#Gradle-Project)
    
-      - [Jar Upload](#Jar-Upload) 
+      - [Jar Upload](#Jar-Upload)
+     
+    - [Maven Project](#Maven-Project) 
 
 ## Artifact Repository Manager
 
@@ -361,18 +363,82 @@ Now I should see my Java application in Maven-Snapshot Repository Manager
 
 In addition to a `Jar` file in there and I see a bunch of other files and metadata files and so on, which is the way NExus actually store components. So I uploaded 1 specific artifact which is JAR, bu some metadata and additional data and files get generated as information or addtional information for the jar file 
 
+## Maven Project
 
+With Maven we are also need to configure artifact and the address of the repository 
 
+Second part is configure the credentials so that Maven can actually upload the jar to Nexus using `nexus user` that we created 
 
+Configure Plugin that enable Maven to upload Jar file :
 
+```
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-deploy-plugin</artifactId>
+    <version>3.1.1</version>
+</plugin>
 
+<plugin> 
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-deploy-plugin</artifactId>
+</plugin>
+```
 
+This part will basically let me configure repository for my Snapshot.
 
+- `<id>nexus-snapshots</id>`: This id to identify the Repository if I have multiple of them configure. So we can reference which Repository from the List
 
+```
+<distributionManagement>
+  <snapshotRepository>
+      <id>nexus-snapshots</id> 
+      <url>http://143.198.134.109:8081/repository/maven-snapshots/</url>
+  </snapshotRepository>
+</distributionManagement>
+```
 
+Configure Credentials so Maven can also authenticate with it using `nexus user`
 
+- The way we configure user credentiasl for Repository in Maven is in `.m2` folder in my user directory . This is a hidden folder in my home directory
 
+- Inside I have `repository` folder which hold all the locally downloaded dependencies of my Maven projects
 
+- And in `.m2` folder I will create a file `settings.xml`. This is a file where Maven Global credentials can be defined . This will be accessible for all my Maven projects
 
+```
+<settings>
+ <servers>
+   <server>
+    <id>nexus-snapshots</id>
+    <username>tim</username>
+    <password>My-password</password>
+   </server>
+ </servers>
+</settings>
+```
+
+- `<settings>` list of settings here and servers is bascially credentials to any server that Maven has to authenticate to 
+
+- `<id>nexus-snapshots</id>` the same id that I configure above
+
+- Now I have everything ready to upload to Nexus Repository
+
+Move to Java-Maven folder : `cd Java-Maven`
+
+Build the Jar: `mvn package`
+
+![Screenshot 2025-06-15 at 11 37 02](https://github.com/user-attachments/assets/b9137847-1c99-4f93-ba7d-9c08d0a23dac)
+
+Once it success I can see a `target` folder with a Jar Artifact 
+
+![Screenshot 2025-06-15 at 11 37 48](https://github.com/user-attachments/assets/6732ae0c-679d-4ead-bef5-89af2387f4b2)
+
+To upload the Jar `mvn deploy` .
+
+![Screenshot 2025-06-15 at 11 39 55](https://github.com/user-attachments/assets/6a49e3ed-bbc3-4d2f-8608-aeb3dc68d21d)
+
+Once it  success I can see my Maven Artifact in Nexus Repository 
+
+<img width="600" alt="Screenshot 2025-06-15 at 11 40 05" src="https://github.com/user-attachments/assets/b01918e3-bf68-427b-9e50-cc797fb0814e" />
 
 
