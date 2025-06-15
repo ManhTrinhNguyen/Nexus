@@ -28,7 +28,17 @@
      
     - [Maven Project](#Maven-Project)
    
-- [Nexus API](#Nexus-API) 
+- [Nexus API](#Nexus-API)
+
+- [Blob Store](#Blob-Store)
+
+  - [Blob Store Type](#Blob-Store-Type)
+ 
+  - [Blob Store State](#Blob-Store-State)
+ 
+  - [Blob Count](#Blob-Count)
+ 
+  - [Create a Blob store](#Create-a-Blob-store)
 
 ## Artifact Repository Manager
 
@@ -495,9 +505,72 @@ To use Nexus API or any API: I should always reference the documentation. Not le
 
 2: there are a lot of endpoints
 
+## Blob Store
+
+ Nexus must have some kind of storage configured to store all these `assets` and `components`
+
+ Nexus is using Blob stores as a storage for its components
+
+ Blob Store is what Nexus is using to manage the storage per repository for all of its components 
+
+ **How does it work?**
+
+ Blob Store is internal storage mechanism for binary parts of artifacts 
+ 
+ And blob store can be on a local file on the Server where Nexus is deployed
+
+ Or it could be a Cloud based storage like Amazon S3 . 
+ 
+ Each Blob Store Can be use by one or multiple repositories and repository group 
 
 
+In my Server where I deploy Nexus `ls /opt/sonatype-work/nexus3/blobs` . This is a file storage that keep alot of different information about Nexus like configuration and plugins etc ... And this is where blob store storage is configured so all the components assets and so on will be store here 
 
+In `/opt/sonatype-work/nexus3/blobs` I have a default folder that automatic configured 
+
+In that `default` folder I have all the data in the content folder 
+
+#### Blob Store Type 
+
+Type field = Storage Backend 
+
+File represent `File system-based` storage 
+
+`S3` allow Blobs to be stored in AWS S3 Cloud Storage 
+
+#### Blob Store State 
+
+State filed = State of the Blob store 
+
+`Started` : Indicate it is running as expected 
+
+`failed`: Indicate configuration issue 
+
+
+#### Blob Count
+
+If I look in the `content` folder the Data is actually split up in different volumes or blobs and this is number of blobs that is currently stored 
+
+So the components and the artifacts files that we upload are split into this way to be store in the Blob store 
+
+![Screenshot 2025-06-15 at 12 34 35](https://github.com/user-attachments/assets/65b5b90f-a8a6-4b2d-b029-a7ef4f734ec1)
+
+
+#### Create a Blob store
+
+The `Type` can be `File` or `S3`
+
+Path parameter should be an absolute path  `/opt/sonatype-work/nexus3/blobs/`
+
+**Some things to consider**
+
+Blob store can't be modified 
+
+Blob store used by Repository can't be deleted 
+
+I need to decide carefully how many blob stores I create with which sizes and which one will use for Repository 
+
+The reasone for that is Once a repository is allocated to a blob store it is there permanently . Blob store can be moved from one storage device to another for example to a larger storage device If I need more space I can do it manually but blob stores can not be split and also one repository cannot use multiple blob stores 
 
 
 
